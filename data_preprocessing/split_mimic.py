@@ -1,11 +1,13 @@
+import argparse
 import glob
 import gzip
 import os
+
 import pandas as pd
 from tqdm import tqdm
-import argparse
 
 """Split MIMIC-CXR reports to train and test splits according to MIMIC-CXR-JPG."""
+
 
 def get_mimic_train_test_split(mimic_cxr_jpg_split_path):
     """Splits MIMIC-CXR DICOM IDs, study IDs, subject IDs into train/test sets.
@@ -36,9 +38,8 @@ def get_mimic_train_test_split(mimic_cxr_jpg_split_path):
             else:
                 raise Exception(f"Unknown split label {split}.")
 
-        print(f"train study IDs: {len(train_ids)}\n"
-              f"test study IDs: {len(test_ids)}")
-        assert(len(set(train_ids).intersection(set(test_ids))) == 0)
+        print(f"train study IDs: {len(train_ids)}\n" f"test study IDs: {len(test_ids)}")
+        assert len(set(train_ids).intersection(set(test_ids))) == 0
 
     return train_ids, test_ids
 
@@ -63,23 +64,40 @@ def generate_mimic_train_test_csv(report_files_dir, split_ids, csv_path):
         else:
             print(f"Report {report_path} not found.")
 
-    df = pd.DataFrame(reports,
-                      columns=["dicom_id", "study_id", "subject_id", "report"])
+    df = pd.DataFrame(reports, columns=["dicom_id", "study_id", "subject_id", "report"])
     df.to_csv(csv_path)
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description='Create csvs for the full reports of mimic train and test')
 
-    parser.add_argument('--report_files_dir', type=str, required=True, help="mimic files directory containing all reports")
-    parser.add_argument('--split_path', type=str, required=True, help="path to split file in mimic-cxr-jpg")
-    parser.add_argument('--out_dir', type=str, required=True, help="directory to store train and test splits")
+if __name__ == "__main__":
+    parser = argparse.ArgumentParser(
+        description="Create csvs for the full reports of mimic train and test"
+    )
+
+    parser.add_argument(
+        "--report_files_dir",
+        type=str,
+        required=True,
+        help="mimic files directory containing all reports",
+    )
+    parser.add_argument(
+        "--split_path",
+        type=str,
+        required=True,
+        help="path to split file in mimic-cxr-jpg",
+    )
+    parser.add_argument(
+        "--out_dir",
+        type=str,
+        required=True,
+        help="directory to store train and test splits",
+    )
 
     args = parser.parse_args()
 
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir)
-    train_path = os.path.join(args.out_dir, 'mimic_train_full.csv')
-    test_path = os.path.join(args.out_dir, 'mimic_test_full.csv')
+    train_path = os.path.join(args.out_dir, "mimic_train_full.csv")
+    test_path = os.path.join(args.out_dir, "mimic_test_full.csv")
 
     train_ids, test_ids = get_mimic_train_test_split(args.split_path)
     generate_mimic_train_test_csv(args.report_files_dir, train_ids, train_path)
