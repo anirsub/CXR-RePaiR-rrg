@@ -75,7 +75,7 @@ def main(args):
     # # save
     if not os.path.exists(args.out_dir):
         os.makedirs(args.out_dir)
-    out_path = args.out_dir + "/generations_full.csv"
+    out_path = args.out_dir + "/generations.csv"
     save_reports(y_pred, y_sids, raw_impressions, out_path)
 
 
